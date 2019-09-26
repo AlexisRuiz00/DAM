@@ -8,6 +8,17 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 
 public class Main {
+	
+	public static String construirApellido(RandomAccessFile f) throws IOException {
+		
+		String apellido = "";
+	
+		
+		for(int i=0;i<10;i++) {
+			apellido+=f.readChar();
+		}
+		return apellido;
+	}
 
 	public static String pedirDato() {
 		
@@ -26,36 +37,55 @@ public class Main {
 	
 	public static boolean altaEmpleado(Empleado e, RandomAccessFile f) throws IOException {
 		
-		if(consultaEmpleado(e.getId(),f)) {
-			return false;
-		}else {
-			f.write(e.getId());
-			f.writeChars(e.getApellido());
-			f.writeInt(e.getDepartamento());
-			f.writeDouble(e.getSalario());
-			f.close();
-			return true;
-		}
+		int tamanoRegistro = 36;
+		int posicion = tamanoRegistro*(e.getId()-1);
 		
-		
+			try {
+				f.seek(posicion);
+					if(e.getId() == f.readInt()) {
+						System.out.println("¡Imposible registrar, Id ya existe!");
+						return false;
+						
+					}else{
+						f.writeInt(e.getId());
+						f.writeChars(e.getApellido());
+						f.writeInt(e.getDepartamento());
+						f.writeDouble(e.getSalario());
+						
+						System.out.println("¡Registrado con exito!");
+						return true;
+					}
+			}catch(IOException ioe) {
+					
+				f.writeInt(e.getId());
+				f.writeChars(e.getApellido());
+				f.writeInt(e.getDepartamento());
+				f.writeDouble(e.getSalario());
+				System.out.println("¡Registrado con exito!");
+				return true;
+			}
 	}
 	
 	
 	
 	
-	public static boolean consultaEmpleado(int id ,RandomAccessFile f) throws IOException {
+	public static boolean consultaEmpleado(int id ,RandomAccessFile f) {
+		
 		
 		int tamanoRegistro = 36;
 		int posicion = tamanoRegistro*(id-1);
-		f.seek(posicion);
 		
-		if(id == f.readInt()) {
+		try {
+			f.seek(posicion);
+			Empleado e = new Empleado(f.readInt(),construirApellido(f),f.readInt(),f.readDouble());
+			System.out.println(e);
 			return true;
-		}else {return false;}
-
+			
+		}catch(Exception e) {
+			return false; 
+		}
+	
 	}
-	
-	
 	
 	
 	public static void main(String[] args) throws IOException {
@@ -66,13 +96,20 @@ public class Main {
 				
 		RandomAccessFile empleados = new RandomAccessFile(fichero, "rw");
 
+		Empleado x = new  Empleado(1,"martinez  ",2,150);
+		Empleado s = new  Empleado(1,"cinco     ",2,150);
+		Empleado a = new  Empleado(5,"martinez  ",5,350);
 		
+		
+		altaEmpleado(x, empleados);
+		altaEmpleado(a, empleados);
+		altaEmpleado(s, empleados);
 			
 		
 		
 		do {		
 			
-					System.out.println( "\n\n1- Dar de alta empleado"
+					System.out.print( "\n\n1- Dar de alta empleado"
 									+	"\n2- Dar de baja empleado"
 									+	"\n3- Conslutar empleado"
 									+	"\n4- Modificar empleado"
@@ -94,17 +131,31 @@ public class Main {
 					switch(opc) {
 					
 					case 1:
-						Empleado x = new  Empleado(1,"martinez  ",2,150);
-						Empleado s = new  Empleado(1,"cinco     ",2,150);
-						Empleado a = new  Empleado(5,"martinez  ",5,350);
 						
-						
-						altaEmpleado(x, empleados);
 						altaEmpleado(a, empleados);
-						altaEmpleado(s, empleados);
-					
 						break;
+						
+					case 2:
+						
+						break;
+					
+					case 3:
+						int id = 0;
+						
+						try {
+							id = Integer.parseInt(pedirDato());
+							System.out.println();
+						}catch(NumberFormatException e){System.err.println("Id no válido, vuelva a introducir uno por favor: ");}															
+						consultaEmpleado(id, empleados);				
+						break;
+						
+						
+					case 5:
+						empleados.close();
+						break;
+						
 					}
+					
 					
 					
 					
