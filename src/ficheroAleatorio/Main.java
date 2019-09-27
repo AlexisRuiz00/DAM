@@ -2,7 +2,6 @@ package ficheroAleatorio;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
@@ -35,56 +34,58 @@ public class Main {
 
 	}
 	
+	
+	public static boolean existeId(RandomAccessFile f, int id) {
+		
+		int tamanoRegistro = 36;
+		int posicion = tamanoRegistro*(id-1);
+		
+			try {
+				f.seek(posicion);
+					if(id == f.readInt()) {
+						return true;}
+						else return false;
+			}catch(IOException e) {
+				return false;
+			}
+	}
+	
 	public static boolean altaEmpleado(Empleado e, RandomAccessFile f) throws IOException {
 		
 		int tamanoRegistro = 36;
 		int posicion = tamanoRegistro*(e.getId()-1);
 		
-			try {
-				f.seek(posicion);
-					if(e.getId() == f.readInt()) {
-						System.out.println("¡Imposible registrar, Id ya existe!");
-						return false;
-						
-					}else{
-						f.writeInt(e.getId());
-						f.writeChars(e.getApellido());
-						f.writeInt(e.getDepartamento());
-						f.writeDouble(e.getSalario());
-						
-						System.out.println("¡Registrado con exito!");
-						return true;
-					}
-			}catch(IOException ioe) {
-					
-				f.writeInt(e.getId());
-				f.writeChars(e.getApellido());
-				f.writeInt(e.getDepartamento());
-				f.writeDouble(e.getSalario());
-				System.out.println("¡Registrado con exito!");
-				return true;
-			}
-	}
+
+					if(!existeId(f, e.getId())){
+								f.writeInt(e.getId());
+								f.writeChars(e.getApellido());
+								f.writeInt(e.getDepartamento());
+								f.writeDouble(e.getSalario());
+								
+								System.out.println("¡Registrado con exito!");
+								return true;
+							}else {
+								System.out.println("¡Ya existe el id!");
+								return false;
+							}
+								
+		}
 	
 	
-	
-	
-	public static boolean consultaEmpleado(int id ,RandomAccessFile f) {
-		
+	public static boolean consultaEmpleado(int id ,RandomAccessFile f) throws IOException {
 		
 		int tamanoRegistro = 36;
 		int posicion = tamanoRegistro*(id-1);
 		
-		try {
-			f.seek(posicion);
-			Empleado e = new Empleado(f.readInt(),construirApellido(f),f.readInt(),f.readDouble());
-			System.out.println(e);
-			return true;
-			
-		}catch(Exception e) {
-			return false; 
-		}
-	
+		if(!existeId(f, id)) {
+			System.out.println("¡No existe el registro!");
+			return false;
+				}else{
+							f.seek(posicion);
+							Empleado e = new Empleado(f.readInt(),construirApellido(f),f.readInt(),f.readDouble());
+							System.out.println(e);
+							return true;
+				}
 	}
 	
 	
@@ -131,6 +132,47 @@ public class Main {
 					switch(opc) {
 					
 					case 1:
+						
+						boolean flag = false;
+						Empleado empleadoTmp = new Empleado();
+						String apellido = "";
+						
+						System.out.println("Id: ");
+						
+						
+						//PEDIR ID
+						do {
+							try {
+									empleadoTmp.setId(Integer.parseInt(pedirDato()) );
+									if(existeId(empleados,empleadoTmp.getId())) {
+										System.out.println("¡El id ya está registrado!");
+									}else {
+										flag = true;
+										System.out.println();	
+									}}catch(NumberFormatException e){
+										System.err.println("Id no válido, introduzca un id válido por favor");}
+						}while(!flag);
+						flag = false;
+						
+						//PEDIR APELLIDO
+						System.out.println("Apellido: ");
+						
+						do {
+								apellido = pedirDato();
+								if(apellido.length() == 10) {
+									flag=true;
+								}else if(apellido.length() == 10)	{
+									//RELLENAR HASTA QUE SEA 10
+									flag = true;
+								}else {System.err.println("El apellido no puede tener más de 10 carácteres");}
+						}while(!flag);
+						empleadoTmp.setApellido(apellido);
+						flag = false;
+						
+						//PEDIR DEPARTAMENTO
+						//PEDIR SALARIO
+								
+						
 						
 						altaEmpleado(a, empleados);
 						break;
