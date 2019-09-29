@@ -21,7 +21,7 @@ public class Empleado {
 	
 	@Override
 	public String toString() {
-		return "Id: "+id+"\nApellido: "+apellido+"\nDepartamento: "+departamento+"\nSalario: "+salario;
+		return "--------------------\nID: "+id+"\nApellido: "+apellido+"\nDepartamento: "+departamento+"\nSalario: "+salario+"\n--------------------";
 	}
 
 	

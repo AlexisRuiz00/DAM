@@ -43,8 +43,8 @@ public class Main {
 			try {
 				f.seek(posicion);
 					if(id == f.readInt()) {
-						return true;}
-						else return false;
+						return true;
+					}else { return false;}
 			}catch(IOException e) {
 				return false;
 			}
@@ -57,6 +57,7 @@ public class Main {
 		
 
 					if(!existeId(f, e.getId())){
+								f.seek(posicion);
 								f.writeInt(e.getId());
 								f.writeChars(e.getApellido());
 								f.writeInt(e.getDepartamento());
@@ -65,7 +66,7 @@ public class Main {
 								System.out.println("¡Registrado con exito!");
 								return true;
 							}else {
-								System.out.println("¡Ya existe el id!");
+								System.err.println("¡YA EXISTE EL ID " + e.getId() + "!");
 								return false;
 							}
 								
@@ -78,7 +79,7 @@ public class Main {
 		int posicion = tamanoRegistro*(id-1);
 		
 		if(!existeId(f, id)) {
-			System.out.println("¡No existe el registro!");
+			System.err.print("¡NO EXISTE EL REGISTRO!\nIntroduzca un id registrado por favor: ");
 			return false;
 				}else{
 							f.seek(posicion);
@@ -107,7 +108,7 @@ public class Main {
 		altaEmpleado(s, empleados);
 			
 		
-		
+		//MENU PRINCIPAL
 		do {		
 			
 					System.out.print( "\n\n1- Dar de alta empleado"
@@ -130,76 +131,182 @@ public class Main {
 					}while(opc<0 || opc >5);
 					
 					switch(opc) {
+	
 					
+	//DAR DE ALTA UN EMPLEADO
 					case 1:
 						
 						boolean flag = false;
-						Empleado empleadoTmp = new Empleado();
+						boolean exit = false;
+						int idTmp = 0;
+						int depTmp = 0;
+						double salTmp = 0;
 						String apellido = "";
 						
-						System.out.println("Id: ");
 						
-						
-						//PEDIR ID
+						//PEDIR ID		
 						do {
+							System.out.print("ID: ");
 							try {
-									empleadoTmp.setId(Integer.parseInt(pedirDato()) );
-									if(existeId(empleados,empleadoTmp.getId())) {
-										System.out.println("¡El id ya está registrado!");
+									idTmp = Integer.parseInt(pedirDato());
+									if(existeId(empleados,idTmp)) {
+										System.err.print("¡EL ID YA ESTÁ REGISTRADO¡\n¿Quieres introducir otro id? (S/N) ");
+												if(pedirDato().equalsIgnoreCase("S")) {
+													//REPETIR PEDIR ID
+													flag = false;													
+													//SALIR
+												}else flag=true;exit = true;
 									}else {
 										flag = true;
-										System.out.println();	
+										exit = false;
+										
 									}}catch(NumberFormatException e){
-										System.err.println("Id no válido, introduzca un id válido por favor");}
+										System.err.print("¡NO ES UN ID!\nIntroduzca id válido por favor (numero entero)\n");}
 						}while(!flag);
 						flag = false;
 						
-						//PEDIR APELLIDO
-						System.out.println("Apellido: ");
-						
-						do {
-								apellido = pedirDato();
-								if(apellido.length() == 10) {
-									flag=true;
-								}else if(apellido.length() == 10)	{
-									//RELLENAR HASTA QUE SEA 10
-									flag = true;
-								}else {System.err.println("El apellido no puede tener más de 10 carácteres");}
-						}while(!flag);
-						empleadoTmp.setApellido(apellido);
-						flag = false;
-						
-						//PEDIR DEPARTAMENTO
-						//PEDIR SALARIO
+						if (!exit) {
 								
-						
-						
-						altaEmpleado(a, empleados);
+								//PEDIR APELLIDO
+									do {
+										System.out.print("Apellido: ");
+											apellido = pedirDato();
+											
+											if(apellido.length() == 10) {
+												flag=true;
+												
+											}else if(apellido.length() < 10)	{
+												//RELLENAR HASTA QUE SEA 10
+													apellido = String.format("%-10s",apellido);					
+													flag = true;
+											}else {
+												System.err.println("El apellido no puede tener más de 10 carácteres\n\n");
+												}
+									}while(!flag);
+									flag = false;
+					
+									
+								//PEDIR DEPARTAMENTO
+									do {	
+										System.out.print("Departamento: ");
+										try {
+											depTmp = Integer.parseInt(pedirDato());
+											flag=true;
+										}catch(NumberFormatException e){System.err.println("Departamaento no válido, vuelva a introducir uno por favor");}
+									}while(!flag);
+									flag=false;		
+									
+									
+									
+								//PEDIR SALARIO
+									do {	
+										System.out.print("Salario: ");
+										try {
+											 salTmp = Double.parseDouble(pedirDato());
+											 altaEmpleado(new Empleado(idTmp,apellido,depTmp,salTmp), empleados);
+											flag=true;
+										}catch(NumberFormatException e){System.err.println("Salario no válido, vuelva a introducir uno por favor :");}
+									}while(!flag);
+									flag = false;	
+								
+						}else{//doNothing
+							}
 						break;
 						
-					case 2:
 						
+	//DAR DE BAJA UN EMPLEADO		
+					case 2:
+						flag = false;
+						
+						do {	
+							try {
+								System.out.print("ID: ");
+								idTmp = Integer.parseInt(pedirDato());
+								
+								if( !existeId(empleados,idTmp)) {
+									System.err.println("¡NO EXISTE EL REGISTRO!");
+								}else {
+										consultaEmpleado(idTmp, empleados);
+										System.out.print("\n¿Quieres eliminar este registro?\n(S/N) ");
+										
+										if(pedirDato().equalsIgnoreCase("S")) {
+											
+											empleados.seek(empleados.getFilePointer()-36);
+											empleados.writeInt(-1);
+											System.out.print("¡Eliminado con exito!\n\n");
+											flag = true;
+										}}
+											System.out.println("\n¿Quieres eliminar otro registro?\n(S/N)");
+											if(pedirDato().equalsIgnoreCase("S")) {
+												//doNothing
+											}else flag=true;
+										
+							}catch(NumberFormatException e){System.err.println("No existe el empleado, vuelva a introducir un id por favor");}
+						}while(!flag);
+					
 						break;
 					
+						
+						
+						
+	//CONSULTAR UN EMPLEADO
 					case 3:
+						
+						flag = false;
 						int id = 0;
 						
-						try {
-							id = Integer.parseInt(pedirDato());
-							System.out.println();
-						}catch(NumberFormatException e){System.err.println("Id no válido, vuelva a introducir uno por favor: ");}															
-						consultaEmpleado(id, empleados);				
+						do {
+							System.out.print("ID: ");
+							try {
+								id = Integer.parseInt(pedirDato());
+								if(consultaEmpleado(id, empleados)) {flag=true;}
+								
+								System.out.println();
+							}catch(NumberFormatException e){System.err.print("ID NO VÁLIDO\nIntroduzca un id válido por favor\n");}															
+						}while(!flag);
+											
+						break;
+			
+						
+	//MODIFICAR EMPLEADO					
+					case 4:
+						flag = false;
+						double salarioTmp = 0;
+						
+						//PEDIR ID		
+						do {
+							try {
+									System.out.print("ID: ");
+									idTmp = Integer.parseInt(pedirDato());
+									if(existeId(empleados,idTmp)) {
+										
+								//SI ID CORRECTO, PEDIR SALARIO
+										System.out.print("NUEVO SALARIO: ");
+										do {	
+											try {
+												 salTmp = Double.parseDouble(pedirDato());
+												 empleados.seek(36*(idTmp-1));
+												 empleados.skipBytes((int)empleados.getFilePointer()+28);
+												 empleados.writeDouble(salarioTmp);
+												flag=true;
+											}catch(NumberFormatException e){System.err.print("SALARIO NO VALIDO\nVuelva a introducir uno por favor :");}
+										}while(!flag);	
+										
+										
+								//SINO, PEDIR ID DE NUEVO	
+									}else {
+										System.err.print("¡NO EXISTE EL REGISTRO!\nIntroduzca un id registrado por favor: ");
+									}}catch(NumberFormatException e){
+										System.err.print("ID NO VÁLIDO\nIntroduzca un id válido por favor: ");}
+						}while(!flag);
+						flag = false;
 						break;
 						
-						
+	//SALIR DE LA APLICACIÓN					
 					case 5:
 						empleados.close();
 						break;
-						
 					}
-					
-					
-					
 					
 			}while(opc!=5);
 		
