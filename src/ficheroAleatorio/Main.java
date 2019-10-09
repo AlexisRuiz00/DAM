@@ -79,7 +79,7 @@ public class Main {
 		int posicion = tamanoRegistro*(id-1);
 		
 		if(!existeId(f, id)) {
-			System.err.print("¡NO EXISTE EL REGISTRO!\nIntroduzca un id registrado por favor: ");
+			System.err.print("¡NO EXISTE EL REGISTRO!");
 			return false;
 				}else{
 							f.seek(posicion);
@@ -95,7 +95,12 @@ public class Main {
 		
 		int opc =-1;
 		File fichero = new File("empleados.dat");
-				
+		int idTmp = 0;
+		int depTmp = 0;
+		double salTmp = 0;
+		String apellido = "";
+		
+		
 		RandomAccessFile empleados = new RandomAccessFile(fichero, "rw");
 
 		Empleado x = new  Empleado(1,"martinez  ",2,150);
@@ -138,10 +143,10 @@ public class Main {
 						
 						boolean flag = false;
 						boolean exit = false;
-						int idTmp = 0;
-						int depTmp = 0;
-						double salTmp = 0;
-						String apellido = "";
+						idTmp = 0;
+						depTmp = 0;
+						salTmp = 0;
+						apellido = "";
 						
 						
 						//PEDIR ID		
@@ -150,7 +155,8 @@ public class Main {
 							try {
 									idTmp = Integer.parseInt(pedirDato());
 									if(existeId(empleados,idTmp)) {
-										System.err.print("¡EL ID YA ESTÁ REGISTRADO¡\n¿Quieres introducir otro id? (S/N) ");
+										System.err.println("YA EXISTE EL REGISTRO!");
+										System.out.print("\n¿Quieres introducir otro id? (S/N) ");
 												if(pedirDato().equalsIgnoreCase("S")) {
 													//REPETIR PEDIR ID
 													flag = false;													
@@ -260,9 +266,20 @@ public class Main {
 							try {
 								id = Integer.parseInt(pedirDato());
 								if(consultaEmpleado(id, empleados)) {flag=true;}
-								
+								else {
+									System.out.print("\n¿Quieres introducir otro id?\n(S/N)");
+									if(pedirDato().equalsIgnoreCase("S")) {
+										//doNothing
+									}else flag=true;
+								}
 								System.out.println();
-							}catch(NumberFormatException e){System.err.print("ID NO VÁLIDO\nIntroduzca un id válido por favor\n");}															
+							}catch(NumberFormatException e){
+								System.err.println("ID no válido!");
+								System.out.print("¿Quieres introducir otro id?\n(S/N)");
+								if(pedirDato().equalsIgnoreCase("S")) {
+									//doNothing
+								}else flag=true;
+							}															
 						}while(!flag);
 											
 						break;
@@ -271,7 +288,6 @@ public class Main {
 	//MODIFICAR EMPLEADO					
 					case 4:
 						flag = false;
-						double salarioTmp = 0;
 						
 						//PEDIR ID		
 						do {
@@ -285,9 +301,9 @@ public class Main {
 										do {	
 											try {
 												 salTmp = Double.parseDouble(pedirDato());
-												 empleados.seek(36*(idTmp-1));
-												 empleados.skipBytes((int)empleados.getFilePointer()+28);
-												 empleados.writeDouble(salarioTmp);
+												 empleados.seek(36*(idTmp-1)+4+20+4);
+												 empleados.writeDouble(salTmp);
+												 
 												flag=true;
 											}catch(NumberFormatException e){System.err.print("SALARIO NO VALIDO\nVuelva a introducir uno por favor :");}
 										}while(!flag);	
@@ -295,9 +311,17 @@ public class Main {
 										
 								//SINO, PEDIR ID DE NUEVO	
 									}else {
-										System.err.print("¡NO EXISTE EL REGISTRO!\nIntroduzca un id registrado por favor: ");
+										System.err.print("NO EXISTE EL REGISTRO!");
+										System.out.print("\n¿Quieres introducir otro id?\n(S/N)");
+										if(pedirDato().equalsIgnoreCase("S")) {
+											//doNothing
+										}else flag=true;
 									}}catch(NumberFormatException e){
-										System.err.print("ID NO VÁLIDO\nIntroduzca un id válido por favor: ");}
+										System.err.print("NO EXISTE EL REGISTRO!");
+										System.out.print("\n¿Quieres introducir otro id?\n(S/N)");
+										if(pedirDato().equalsIgnoreCase("S")) {
+											//doNothing
+										}else flag=true;}
 						}while(!flag);
 						flag = false;
 						break;
